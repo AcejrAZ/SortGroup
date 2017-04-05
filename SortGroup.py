@@ -13,7 +13,60 @@ test.create_all_subgroups()
 test.add_supergroup("GroupB", size_of_subgroups=5)
 test.create_all_subgroups()
 test.output()
+
+from regionals import SortGroup
+test = SortGroup.CheckinGroups(SortGroup.mypath)
+out = test.divide_list()
 '''
+
+
+class CheckinGroups():
+    def __init__(self, path):
+        self.last = []
+        with open(mypath, 'r') as csvfile:
+            myreader = csv.reader(csvfile, delimiter=',')
+            for i, row in enumerate(myreader):
+                if i == 0:
+                    last_ind = row.index('Last')
+                    continue
+                self.last.append(row[last_ind][:3].upper())
+        self.total = len(self.last)
+        self.last_counts = Counter(self.last)
+
+    def divide_list(self):
+        '''
+        '''
+        div_lists = {'3': {'lists': [list() for _ in range(3)],
+                           'cur_list': 0, 'list_tot': 0},
+                     '4': {'lists': [list() for _ in range(4)],
+                           'cur_list': 0, 'list_tot': 0},
+                     '5': {'lists': [list() for _ in range(5)],
+                           'cur_list': 0, 'list_tot': 0},
+                     '6': {'lists': [list() for _ in range(6)],
+                           'cur_list': 0, 'list_tot': 0},
+                     }
+        letters = list(self.last_counts.keys())
+        letters.sort()
+        for letter in letters:
+            num = self.last_counts[letter]
+            for num_list in div_lists:
+                cur_list = div_lists[num_list]
+                cur_total = cur_list['list_tot']
+                if num + cur_total > self.total/int(num_list):
+                    old_cur = cur_list['cur_list']
+                    if old_cur + 1 < int(num_list):
+                        cur_list['cur_list'] += 1
+                        cur_list['list_tot'] = 0
+                cur_list_idx = cur_list['cur_list']
+                cur_list['lists'][cur_list_idx].append(letter)
+                cur_list['list_tot'] += num
+        for num_list in div_lists:
+            cur_lists = div_lists[num_list]['lists']
+            for i, old_list in enumerate(cur_lists):
+                new_list = ([old_list[0], old_list[-1]],
+                            sum([self.last_counts[x] for x in old_list]))
+                cur_lists[i] = new_list
+        return div_lists
 
 
 class GroupCreation():
